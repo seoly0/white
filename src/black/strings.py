@@ -125,8 +125,8 @@ def assert_is_leaf_string(string: str) -> None:
         AssertionError(...) if the pre-conditions listed above are not
         satisfied.
     """
-    dquote_idx = string.find('"')
-    squote_idx = string.find("'")
+    squote_idx = string.find('"')
+    dquote_idx = string.find("'")
     if -1 in [dquote_idx, squote_idx]:
         quote_idx = max(dquote_idx, squote_idx)
     else:
@@ -177,18 +177,19 @@ def normalize_string_quotes(s: str) -> str:
     strings nested in f-strings.
     """
     value = s.lstrip(STRING_PREFIX_CHARS)
-    if value[:3] == '"""':
+    # if value[:3] == '"""':
+    if value[:3] == "'''":
         return s
 
-    elif value[:3] == "'''":
-        orig_quote = "'''"
-        new_quote = '"""'
-    elif value[0] == '"':
-        orig_quote = '"'
-        new_quote = "'"
+    elif value[:3] == '"""': # "'''":
+        orig_quote = '"""' # "'''"
+        new_quote = "'''" # '"""'
+    elif value[0] == "'": # '"':
+        orig_quote = "'" # '"'
+        new_quote = '"' # "'"
     else:
-        orig_quote = "'"
-        new_quote = '"'
+        orig_quote = '"' # "'"
+        new_quote = "'" # '"'
     first_quote_pos = s.find(orig_quote)
     if first_quote_pos == -1:
         return s  # There's an internal error
@@ -230,15 +231,15 @@ def normalize_string_quotes(s: str) -> str:
                 # Do not introduce backslashes in interpolated expressions
                 return s
 
-    if new_quote == '"""' and new_body[-1:] == '"':
+    if new_quote == '"""' and new_body[-1:] == "'": # '"':
         # edge case:
-        new_body = new_body[:-1] + '\\"'
+        new_body = new_body[:-1] + "\\'" # '\\"'
     orig_escape_count = body.count("\\")
     new_escape_count = new_body.count("\\")
     if new_escape_count > orig_escape_count:
         return s  # Do not introduce more escaping
 
-    if new_escape_count == orig_escape_count and orig_quote == '"':
+    if new_escape_count == orig_escape_count and orig_quote == "'": # '"':
         return s  # Prefer double quotes
 
     return f"{prefix}{new_quote}{new_body}{new_quote}"
